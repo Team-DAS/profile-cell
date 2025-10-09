@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "b1e2c3d4-5678-1234-9abc-def012345678",
+    "name": "Profile Cell - Profile Service API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección para probar todos los endpoints del microservicio Profile Service."
+  },
+  "item": [
+    {
+      "name": "Obtener Perfil Completo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar Información Personal",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreCompleto\": \"Juan Pérez Silva\",\n  \"tituloProfesional\": \"Lead Software Engineer\",\n  \"resumen\": \"Más de 12 años de experiencia...\",\n  \"ubicacion\": {\n    \"ciudad\": \"Bogotá\",\n    \"pais\": \"Colombia\"\n  },\n  \"fotoUrl\": \"https://storage.googleapis.com/bucket/profiles/nueva_foto.jpg\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/personal-info",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "personal-info"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Añadir Experiencia Laboral",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"empresa\": \"Tech Solutions Inc.\",\n  \"puesto\": \"Backend Developer\",\n  \"fechaInicio\": \"2018-01-01\",\n  \"fechaFin\": \"2023-09-30\",\n  \"descripcion\": \"Desarrollo de microservicios para la plataforma X...\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/experience",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "experience"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar Experiencia Laboral",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"empresa\": \"Tech Solutions Inc.\",\n  \"puesto\": \"Backend Developer Senior\",\n  \"fechaInicio\": \"2018-01-01\",\n  \"fechaFin\": \"2023-09-30\",\n  \"descripcion\": \"Lideré el desarrollo de microservicios...\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/experience/{{experienceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "experience", "{{experienceId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar Experiencia Laboral",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/experience/{{experienceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "experience", "{{experienceId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Añadir Habilidad",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Python\",\n  \"nivel\": \"Experto\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/skills",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "skills"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar Habilidad",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/skills/{{skillId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "skills", "{{skillId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Añadir Educación",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"institucion\": \"Universidad de Antioquia\",\n  \"titulo\": \"Ingeniero de Sistemas\",\n  \"fechaFin\": \"2017-12-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/education",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "education"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar Educación",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"institucion\": \"Universidad de Antioquia\",\n  \"titulo\": \"Magíster en Ingeniería\",\n  \"fechaFin\": \"2020-12-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/education/{{educationId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "education", "{{educationId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar Educación",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/education/{{educationId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "education", "{{educationId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Añadir Portafolio",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Sistema de E-commerce\",\n  \"descripcion\": \"Plataforma de ventas desarrollada con Django y React.\",\n  \"url\": \"https://github.com/juanperez/ecommerce\",\n  \"documentoUrl\": \"https://storage.googleapis.com/bucket/portafolios/ecommerce_caso.pdf\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/portfolio",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "portfolio"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar Portafolio",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"titulo\": \"Sistema de E-commerce Mejorado\",\n  \"descripcion\": \"Nueva versión con microservicios.\",\n  \"url\": \"https://github.com/juanperez/ecommerce-v2\",\n  \"documentoUrl\": \"https://storage.googleapis.com/bucket/portafolios/ecommerce_v2.pdf\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/portfolio/{{portfolioId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "portfolio", "{{portfolioId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Eliminar Portafolio",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/profiles/{{userId}}/portfolio/{{portfolioId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "profiles", "{{userId}}", "portfolio", "{{portfolioId}}"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "usuario-uuid-abc-123" },
+    { "key": "experienceId", "value": "" },
+    { "key": "skillId", "value": "" },
+    { "key": "educationId", "value": "" },
+    { "key": "portfolioId", "value": "" }
+  ]
+}
+

@@ -1,0 +1,19 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: cell-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: profile-service
+          uri: http://profile-service:8091
+          predicates:
+            - Path=api/vi/profiles/**
+
+management: # Configuracion del Actuator
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info, metrics, gateway, refresh
