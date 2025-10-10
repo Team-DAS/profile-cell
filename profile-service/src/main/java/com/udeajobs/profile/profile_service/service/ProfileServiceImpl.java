@@ -3,6 +3,7 @@ package com.udeajobs.profile.profile_service.service;
 import com.udeajobs.profile.profile_service.dto.request.*;
 import com.udeajobs.profile.profile_service.dto.response.*;
 import com.udeajobs.profile.profile_service.entity.*;
+import com.udeajobs.profile.profile_service.events.CuentaVerificadaEvent;
 import com.udeajobs.profile.profile_service.exception.ProfileNotFoundException;
 import com.udeajobs.profile.profile_service.exception.ResourceNotFoundException;
 import com.udeajobs.profile.profile_service.mapper.ProfileMapper;
@@ -28,6 +29,42 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final ProfileRepository profileRepository;
     private final ProfileMapper profileMapper;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public ProfileResponse createBaseUser(CuentaVerificadaEvent event) {
+        log.info("Creando perfil base para el usuario: {}", event.accountId());
+
+        // Verificar si el usuario ya existe
+        if (profileRepository.existsById(event.accountId())) {
+            log.warn("El usuario {} ya existe, retornando perfil existente", event.accountId());
+            return getProfile(event.accountId());
+        }
+
+        // Crear perfil base con metadata
+        Profile profile = Profile.builder()
+                .id(event.accountId())
+                .informacionPersonal(
+                        InformacionPersonal.builder()
+                                .nombreCompleto(event.fullName())
+                                .email(event.email())
+                                .build()
+                )
+                .metadata(Metadata.builder()
+                        .fechaCreacion(LocalDateTime.now())
+                        .ultimaActualizacion(LocalDateTime.now())
+                        .perfilCompleto(false)
+                        .build())
+                .build();
+
+        profileRepository.save(profile);
+
+        log.info("Usuario base creado exitosamente: {}", event.accountId());
+        return profileMapper.toProfileResponse(profile);
+    }
 
     /**
      * {@inheritDoc}

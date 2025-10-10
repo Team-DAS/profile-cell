@@ -23,6 +23,11 @@ public class InformacionPersonal {
     private String nombreCompleto;
 
     /**
+     * Correo electrónico del usuario
+     */
+    private String email;
+
+    /**
      * Título profesional del usuario
      */
     private String tituloProfesional;

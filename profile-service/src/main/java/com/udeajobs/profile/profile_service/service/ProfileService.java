@@ -2,6 +2,7 @@ package com.udeajobs.profile.profile_service.service;
 
 import com.udeajobs.profile.profile_service.dto.request.*;
 import com.udeajobs.profile.profile_service.dto.response.*;
+import com.udeajobs.profile.profile_service.events.CuentaVerificadaEvent;
 
 /**
  * Interfaz del servicio de perfiles que define las operaciones de negocio.
@@ -10,6 +11,14 @@ import com.udeajobs.profile.profile_service.dto.response.*;
  * @version 1.0
  */
 public interface ProfileService {
+
+    /**
+     * Creates a base user profile for event usage.
+     *
+     * @param event event data
+     * @return created base profile
+     */
+    ProfileResponse createBaseUser(CuentaVerificadaEvent event);
 
     /**
      * Obtiene el perfil completo de un usuario.
