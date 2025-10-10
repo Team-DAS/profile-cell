@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   # Red privada para la comunicación interna de la célula de perfiles
   profile-network:
@@ -11,6 +9,9 @@ networks:
 
 volumes:
   mongo-profile-data:
+    driver: local
+
+  minio-data:
     driver: local
 
 services:
@@ -64,3 +65,19 @@ services:
       - profile-service
     environment:
       - SERVER_PORT=8090
+
+  minio_storage:
+    image: minio/minio:latest
+    container_name: minio_storage
+    restart: unless-stopped
+    volumes:
+      - minio-data:/data # Mapea el volumen para que los archivos no se pierdan
+    ports:
+      - "9000:9000" # Puerto para la API (usado por el file-service)
+      - "9001:9001" # Puerto para la consola web
+    environment:
+      - MINIO_ROOT_USER=minioadmin   
+      - MINIO_ROOT_PASSWORD=minioadmin 
+    command: server /data --console-address ":9001"
+    networks:
+      - profile-network
