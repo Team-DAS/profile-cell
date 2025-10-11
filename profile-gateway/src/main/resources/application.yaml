@@ -10,7 +10,11 @@ spring:
         - id: profile-service
           uri: http://profile-service:8091
           predicates:
-            - Path=api/vi/profiles/**
+            - Path=/api/v1/profiles/**
+        - id: file-service
+          uri: http://file-service:8092
+          predicates:
+            - Path=/api/v1/files/**
 
 management: # Configuracion del Actuator
   endpoints:

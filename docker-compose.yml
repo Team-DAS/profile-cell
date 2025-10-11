@@ -44,10 +44,19 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://mongo_profile:27017/profiles_db
       - RABBITMQ_HOST=rabbitmq-udeajobs
 
+  file-service:
+    build:
+      context: ./file-service
+    container_name: file-service
+    restart: unless-stopped
+    networks:
+      - profile-network
+      - infrastructure-network # <-- Conectado a la red compartida
+    depends_on:
+      - minio_storage
+    environment:
+      - SERVER_PORT=8092
 
-  # Aquí irían los otros servicios de la célula (file-service, dashboard-service)
-  # file-service:
-  #   ...
   # dashboard-service:
   #   ...
 
