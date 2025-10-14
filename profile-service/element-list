@@ -1,0 +1,13 @@
+com.udeajobs.profile.profile_service
+com.udeajobs.profile.profile_service.config
+com.udeajobs.profile.profile_service.controller
+com.udeajobs.profile.profile_service.dto.request
+com.udeajobs.profile.profile_service.dto.response
+com.udeajobs.profile.profile_service.entity
+com.udeajobs.profile.profile_service.enums
+com.udeajobs.profile.profile_service.events
+com.udeajobs.profile.profile_service.exception
+com.udeajobs.profile.profile_service.listeners
+com.udeajobs.profile.profile_service.mapper
+com.udeajobs.profile.profile_service.repository
+com.udeajobs.profile.profile_service.service
