@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         # Añade aquí los nombres de las carpetas de tus microservicios
-        service: [ 'identity-gateway', 'account-service', 'auth-service', 'authz-service' ]
+        service: [ 'profile-gateway', 'file-service', 'profile-service']
 
     steps:
       - name: Checkout code
