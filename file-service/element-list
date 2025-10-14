@@ -1,0 +1,8 @@
+com.udeajobs.profile_cell.file_service
+com.udeajobs.profile_cell.file_service.config
+com.udeajobs.profile_cell.file_service.controller
+com.udeajobs.profile_cell.file_service.dto
+com.udeajobs.profile_cell.file_service.enums
+com.udeajobs.profile_cell.file_service.exception
+com.udeajobs.profile_cell.file_service.service
+com.udeajobs.profile_cell.file_service.service.impl
