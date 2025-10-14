@@ -42,20 +42,20 @@ public class S3Config {
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
+        URI endpoint = URI.create(endpointUrl.startsWith("http") ? endpointUrl : "http://" + endpointUrl);
+
         S3Configuration s3Config = S3Configuration.builder()
-                .pathStyleAccessEnabled(true)  // Crucial para MinIO
+                .pathStyleAccessEnabled(true)
                 .build();
 
-        log.info("Valor real de endpointUrl = '{}'", endpointUrl);
-
-        System.out.println("✅ Endpoint URL recibido: [" + endpointUrl + "]");
-
+        log.info("Creando cliente S3 para region {} con endpoint {}", region, endpoint);
         return S3Client.builder()
-                .endpointOverride(URI.create(endpointUrl))
+                .endpointOverride(endpoint)
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of(region))
                 .serviceConfiguration(s3Config)
                 .build();
+
     }
 }
 

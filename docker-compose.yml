@@ -2,10 +2,15 @@ networks:
   # Red privada para la comunicación interna de la célula de perfiles
   profile-network:
     driver: bridge
+    name: profile-network
   # Red compartida para conectarse a la célula de observabilidad
   infrastructure-network:
     external: true
     name: infrastructure-network
+
+  web-gateway:
+    external: true
+    name: web-gateway
 
 volumes:
   mongo-profile-data:
@@ -53,8 +58,11 @@ services:
       - profile-network
       - infrastructure-network # <-- Conectado a la red compartida
     depends_on:
-      - minio_storage
+      - minio
     environment:
+      - S3_ENDPOINT_URL=minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
       - SERVER_PORT=8092
 
   # dashboard-service:
@@ -65,19 +73,24 @@ services:
       context: ./profile-gateway
     container_name: profile-gateway
     restart: unless-stopped
-    ports:
-      - "8090:8090" # Puerto de entrada para la Célula 2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.profile.rule=PathPrefix(`/profile`)"
+      - "traefik.http.routers.profile.entrypoints=web"
+      - "traefik.http.services.profile.loadbalancer.server.port=8090"
+      - "traefik.http.routers.profile.middlewares=cors-policy@file" # Aplica el middleware CORS definido en dynamic_conf.yml
     networks:
       - profile-network
       - infrastructure-network # <-- Conectado a la red compartida
+      - web-gateway
     depends_on:
       - profile-service
     environment:
       - SERVER_PORT=8090
 
-  minio_storage:
+  minio:
     image: minio/minio:latest
-    container_name: minio_storage
+    container_name: minio
     restart: unless-stopped
     volumes:
       - minio-data:/data # Mapea el volumen para que los archivos no se pierdan
