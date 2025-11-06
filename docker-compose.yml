@@ -45,7 +45,6 @@ services:
     depends_on:
       - mongo_profile
     environment:
-      - SERVER_PORT=8091
       - SPRING_DATA_MONGODB_URI=mongodb://mongo_profile:27017/profiles_db
       - RABBITMQ_HOST=rabbitmq-udeajobs
 
@@ -63,24 +62,21 @@ services:
       - S3_ENDPOINT_URL=minio:9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
-      - SERVER_PORT=8092
-
-  # dashboard-service:
-  #   ...
-
   profile-gateway:
     build:
       context: ./profile-gateway
     container_name: profile-gateway
     restart: unless-stopped
+    environment:
+      - PROFILE_SERVICE_URL=http://profile-service:8080
+      - FILES_SERVICE_URL=http://file-service:8080
     networks:
       - profile-network
       - infrastructure-network # <-- Conectado a la red compartida
       - web-gateway
     depends_on:
       - profile-service
-    environment:
-      - SERVER_PORT=8090
+
 
   minio:
     image: minio/minio:latest
@@ -97,3 +93,15 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - profile-network
+
+  profile-docs:
+    image: scalarapi/api-reference:latest # *** ¡Cambiando a la imagen correcta! ***
+    container_name: profile-docs
+    ports:
+    - "5052:8080" # El puerto de la imagen 'api-reference' es 8080 por defecto
+    restart: unless-stopped
+    env_file:
+      - ./scalar/.env
+    networks:
+      - profile-network
+

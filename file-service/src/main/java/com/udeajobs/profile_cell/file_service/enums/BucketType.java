@@ -1,5 +1,6 @@
 package com.udeajobs.profile_cell.file_service.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 /**
@@ -7,10 +8,15 @@ import lombok.Getter;
  * Esto previene ataques de inyección de rutas y asegura que solo se acceda a buckets autorizados.
  */
 @Getter
+@Schema(
+        description = "Tipos de buckets disponibles en el sistema de almacenamiento",
+        example = "PROFILES"
+)
 public enum BucketType {
     /**
      * Bucket para almacenar archivos relacionados con perfiles de usuario
      */
+    @Schema(description = "Bucket para archivos de perfiles de usuario (fotos, CVs, documentos)")
     PROFILES("profiles");
 
 

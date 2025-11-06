@@ -1,7 +1,22 @@
-FROM eclipse-temurin:21-jdk-jammy
+# Builder
+FROM gradle:9.1.0-jdk21 AS builder
+WORKDIR /app
 
-ARG JAR_FILE=build/libs/*.jar
+COPY build.gradle gradlew ./
+COPY gradle ./gradle
 
-COPY ${JAR_FILE} app.jar
+RUN ./gradlew dependencies
 
-ENTRYPOINT ["java","-jar","/app.jar", "--spring.profiles.active=prod"]
+COPY src ./src
+
+# Construir el jar
+RUN ./gradlew build --no-daemon -x test
+
+# Runtime
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Ejecucción
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: file-service
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1/files
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    path: /docs
+s3:
+  endpoint-url: ${S3_ENDPOINT_URL}
+  access-key: ${S3_ACCESS_KEY}
+  secret-key: ${S3_SECRET_KEY}
+  region: us-east-1
