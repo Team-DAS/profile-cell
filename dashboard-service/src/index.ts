@@ -8,6 +8,7 @@ import { typeDefs } from './graphql/schema/typeDefs';
 import { resolvers } from './graphql/resolvers';
 import { metricsHandler } from './metrics';
 import { errorHandler, notFoundHandler, formatGraphQLError } from './middleware/errorHandler';
+import playground from 'graphql-playground-middleware-express';
 
 /**
  * Función principal para iniciar el servidor
@@ -43,6 +44,7 @@ async function startServer(): Promise<void> {
       resolvers,
       formatError: formatGraphQLError,
       introspection: true,
+      csrfPrevention: false, // Desactivado - el gateway maneja la seguridad
     });
 
     await apolloServer.start();
@@ -55,13 +57,16 @@ async function startServer(): Promise<void> {
       })
     );
 
-    // 10. Middleware de manejo de rutas no encontradas
+    // 10. GraphQL Playground
+    app.get('/playground', playground({ endpoint: '/graphql' }));
+
+    // 11. Middleware de manejo de rutas no encontradas
     app.use(notFoundHandler);
 
-    // 11. Middleware de manejo global de errores
+    // 12. Middleware de manejo global de errores
     app.use(errorHandler);
 
-    // 12. Iniciar el servidor HTTP en puerto 8080
+    // 13. Iniciar el servidor HTTP en puerto 8080
     const server = app.listen(8080, () => {
         console.log(`
         ╔════════════════════════════════════════════════╗

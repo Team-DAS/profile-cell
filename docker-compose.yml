@@ -70,6 +70,7 @@ services:
     environment:
       - PROFILE_SERVICE_URL=http://profile-service:8080
       - FILES_SERVICE_URL=http://file-service:8080
+      - DASHBOARD_SERVICE_URL=http://dashboard-service:8080
     networks:
       - profile-network
       - infrastructure-network # <-- Conectado a la red compartida
@@ -77,10 +78,23 @@ services:
     depends_on:
       - profile-service
 
+  dashboard-service:
+    build:
+      context: ./dashboard-service
+    container_name: dashboard-service
+    restart: unless-stopped
+    networks:
+      - profile-network
+      - infrastructure-network 
+    depends_on:
+      - mongo_profile
+    environment:
+      - MONGODB_URI=mongodb://mongo_profile:27017/profiles_db
+
 
   minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: minioz
     restart: unless-stopped
     volumes:
       - minio-data:/data # Mapea el volumen para que los archivos no se pierdan

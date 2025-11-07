@@ -5,10 +5,10 @@ dotenv.config();
 
 /**
  * Configuración simple del servicio
- * Solo requiere MONGODB_URI como variable de entorno
+ * MONGODB_URI es requerida como variable de entorno
  */
 const config = {
-  mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/profiles',
+  mongodbUri: process.env.MONGODB_URI || '',
 };
 
 /**

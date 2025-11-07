@@ -11,8 +11,26 @@ fastify.register(metrics, {
 // --- 1. Configuración (Leída de variables de entorno) ---
 const PROFILE_SERVICE_URL = process.env.PROFILE_SERVICE_URL;
 const FILES_SERVICE_URL = process.env.FILES_SERVICE_URL;
+const DASHBOARD_SERVICE_URL = process.env.DASHBOARD_SERVICE_URL;
+
+if (!PROFILE_SERVICE_URL || !FILES_SERVICE_URL || !DASHBOARD_SERVICE_URL) {
+  fastify.log.error('Error: Las variables de entorno de los servicios no están definidas.');
+  process.exit(1);
+}
 
 // --- 3. Registro de Rutas (El Proxy) ---
+fastify.register(httpProxy, {
+  upstream: DASHBOARD_SERVICE_URL,
+  prefix: 'profile-cell/api/v1/dashboard/graphql',  
+  rewritePrefix: '/graphql', 
+});
+
+fastify.register(httpProxy, {
+  upstream: DASHBOARD_SERVICE_URL,
+  prefix: 'profile-cell/api/v1/dashboard/playground',  
+  rewritePrefix: '/playground', 
+});
+
 
 fastify.register(httpProxy, {
   upstream: PROFILE_SERVICE_URL,
