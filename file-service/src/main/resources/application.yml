@@ -1,8 +1,6 @@
 spring:
   application:
     name: file-service
-  profiles:
-    active: dev
   servlet:
     multipart:
       enabled: true
@@ -29,7 +27,7 @@ springdoc:
     path: /docs
 s3:
   endpoint-url: ${ENDPOINT_URL}
-  access-key: ${GCP_ACCESS_KEY}
-  secret-key: ${GCP_SECRET_KEY}
-  bucket-name: ${GCP_BUCKET_NAME}
+  access-key: ${GCS_ACCESS_KEY}
+  secret-key: ${GCS_SECRET_KEY}
+  bucket-name: ${GCS_BUCKET_NAME}
   region: auto
