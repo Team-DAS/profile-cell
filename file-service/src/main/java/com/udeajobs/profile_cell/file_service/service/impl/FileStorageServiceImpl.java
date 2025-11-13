@@ -1,7 +1,7 @@
 package com.udeajobs.profile_cell.file_service.service.impl;
 
 import com.udeajobs.profile_cell.file_service.dto.FileUploadResponse;
-import com.udeajobs.profile_cell.file_service.enums.BucketType;
+import com.udeajobs.profile_cell.file_service.enums.FolderType;
 import com.udeajobs.profile_cell.file_service.exception.FileDeleteException;
 import com.udeajobs.profile_cell.file_service.exception.FileNotFoundException;
 import com.udeajobs.profile_cell.file_service.exception.FileUploadException;
@@ -25,7 +25,8 @@ import java.util.UUID;
 
 /**
  * Implementación del servicio de almacenamiento de archivos.
- * Maneja las operaciones de subida, descarga y eliminación de archivos en S3/MinIO.
+ * Maneja las operaciones de subida, descarga y eliminación de archivos en S3/MinIO
+ * usando un único bucket con carpetas organizadas por tipo.
  */
 @Slf4j
 @Service
@@ -37,45 +38,49 @@ public class FileStorageServiceImpl implements IFileStorageService {
     @Value("${s3.endpoint-url}")
     private String endpointUrl;
 
+    @Value("${s3.bucket-name}")
+    private String bucketName;
+
     /**
-     * Sube un archivo al bucket especificado en S3/MinIO.
+     * Sube un archivo a la carpeta especificada dentro del bucket S3/MinIO.
      * Genera un nombre único combinando un UUID con el nombre original del archivo.
      *
-     * @param bucketType tipo de bucket donde se almacenará el archivo
+     * @param folderType tipo de carpeta donde se almacenará el archivo
      * @param objectName nombre del objeto en el almacenamiento
      * @param file archivo multipart a subir
      * @return FileUploadResponse con información del archivo subido
      * @throws FileUploadException si ocurre un error durante la subida
      */
     @Override
-    public FileUploadResponse uploadFile(BucketType bucketType, String objectName, MultipartFile file) {
+    public FileUploadResponse uploadFile(FolderType folderType, String objectName, MultipartFile file) {
         validateFile(file);
 
-        String bucketName = bucketType.getBucketName();
+        String folderName = folderType.getFolderName();
         String uniqueObjectName = generateUniqueObjectName(objectName);
+        String fullObjectKey = folderName + "/" + uniqueObjectName;
 
         try {
-            log.info("Subiendo archivo {} al bucket {}", uniqueObjectName, bucketName);
+            log.info("Subiendo archivo {} al bucket {} en carpeta {}", uniqueObjectName, bucketName, folderName);
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(uniqueObjectName)
+                    .key(fullObjectKey)
                     .contentType(file.getContentType())
                     .contentLength(file.getSize())
                     .build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            log.info("Archivo {} subido exitosamente al bucket {}", uniqueObjectName, bucketName);
+            log.info("Archivo {} subido exitosamente al bucket {} en carpeta {}", uniqueObjectName, bucketName, folderName);
 
-            String fileUrl = String.format("%s/%s/%s", endpointUrl, bucketName, uniqueObjectName);
+            String fileUrl = String.format("%s/%s/%s", endpointUrl, bucketName, fullObjectKey);
 
             return FileUploadResponse.builder()
                     .objectName(uniqueObjectName)
                     .fileUrl(fileUrl)
                     .contentType(file.getContentType())
                     .size(file.getSize())
-                    .bucketType(bucketType.name())
+                    .folderType(folderType.name())
                     .build();
 
         } catch (S3Exception e) {
@@ -91,25 +96,26 @@ public class FileStorageServiceImpl implements IFileStorageService {
     }
 
     /**
-     * Descarga un archivo del bucket especificado.
+     * Descarga un archivo de la carpeta especificada dentro del bucket.
      * Configura los headers apropiados para forzar la descarga en el navegador.
      *
-     * @param bucketType tipo de bucket desde donde se descargará el archivo
+     * @param folderType tipo de carpeta desde donde se descargará el archivo
      * @param objectName nombre del objeto en el almacenamiento
      * @return ResponseEntity con el recurso del archivo y headers configurados
      * @throws FileNotFoundException si el archivo no existe
      */
     @Override
-    public ResponseEntity<Resource> downloadFile(BucketType bucketType, String objectName) {
-        String bucketName = bucketType.getBucketName();
+    public ResponseEntity<Resource> downloadFile(FolderType folderType, String objectName) {
+        String folderName = folderType.getFolderName();
+        String fullObjectKey = folderName + "/" + objectName;
 
         try {
-            log.info("Descargando archivo {} del bucket {}", objectName, bucketName);
+            log.info("Descargando archivo {} del bucket {} en carpeta {}", objectName, bucketName, folderName);
 
             // Primero verificamos si el objeto existe
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(objectName)
+                    .key(fullObjectKey)
                     .build();
 
             HeadObjectResponse headObjectResponse = s3Client.headObject(headObjectRequest);
@@ -117,7 +123,7 @@ public class FileStorageServiceImpl implements IFileStorageService {
             // Obtenemos el objeto
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(objectName)
+                    .key(fullObjectKey)
                     .build();
 
             InputStreamResource resource = new InputStreamResource(s3Client.getObject(getObjectRequest));
@@ -130,16 +136,16 @@ public class FileStorageServiceImpl implements IFileStorageService {
             headers.setContentLength(headObjectResponse.contentLength());
             headers.setContentDispositionFormData("attachment", objectName);
 
-            log.info("Archivo {} descargado exitosamente del bucket {}", objectName, bucketName);
+            log.info("Archivo {} descargado exitosamente del bucket {} en carpeta {}", objectName, bucketName, folderName);
 
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(resource);
 
         } catch (NoSuchKeyException e) {
-            log.error("Archivo no encontrado: {} en bucket {}", objectName, bucketName);
+            log.error("Archivo no encontrado: {} en bucket {} carpeta {}", objectName, bucketName, folderName);
             throw new FileNotFoundException(
-                    String.format("El archivo '%s' no existe en el bucket '%s'", objectName, bucketName), e
+                    String.format("El archivo '%s' no existe en la carpeta '%s'", objectName, folderName), e
             );
         } catch (S3Exception e) {
             log.error("Error de S3 al descargar archivo: {}", e.getMessage(), e);
@@ -151,23 +157,24 @@ public class FileStorageServiceImpl implements IFileStorageService {
     }
 
     /**
-     * Elimina un archivo del bucket especificado.
+     * Elimina un archivo de la carpeta especificada dentro del bucket.
      *
-     * @param bucketType tipo de bucket desde donde se eliminará el archivo
+     * @param folderType tipo de carpeta desde donde se eliminará el archivo
      * @param objectName nombre del objeto en el almacenamiento
      * @throws FileDeleteException si ocurre un error durante la eliminación
      */
     @Override
-    public void deleteFile(BucketType bucketType, String objectName) {
-        String bucketName = bucketType.getBucketName();
+    public void deleteFile(FolderType folderType, String objectName) {
+        String folderName = folderType.getFolderName();
+        String fullObjectKey = folderName + "/" + objectName;
 
         try {
-            log.info("Eliminando archivo {} del bucket {}", objectName, bucketName);
+            log.info("Eliminando archivo {} del bucket {} en carpeta {}", objectName, bucketName, folderName);
 
             // Verificamos si el objeto existe antes de eliminarlo
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(objectName)
+                    .key(fullObjectKey)
                     .build();
 
             s3Client.headObject(headObjectRequest);
@@ -175,17 +182,17 @@ public class FileStorageServiceImpl implements IFileStorageService {
             // Eliminamos el objeto
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(objectName)
+                    .key(fullObjectKey)
                     .build();
 
             s3Client.deleteObject(deleteObjectRequest);
 
-            log.info("Archivo {} eliminado exitosamente del bucket {}", objectName, bucketName);
+            log.info("Archivo {} eliminado exitosamente del bucket {} en carpeta {}", objectName, bucketName, folderName);
 
         } catch (NoSuchKeyException e) {
-            log.error("Archivo no encontrado para eliminar: {} en bucket {}", objectName, bucketName);
+            log.error("Archivo no encontrado para eliminar: {} en bucket {} carpeta {}", objectName, bucketName, folderName);
             throw new FileNotFoundException(
-                    String.format("El archivo '%s' no existe en el bucket '%s'", objectName, bucketName), e
+                    String.format("El archivo '%s' no existe en la carpeta '%s'", objectName, folderName), e
             );
         } catch (S3Exception e) {
             log.error("Error de S3 al eliminar archivo: {}", e.getMessage(), e);

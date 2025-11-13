@@ -1,7 +1,7 @@
 package com.udeajobs.profile_cell.file_service.controller;
 
 import com.udeajobs.profile_cell.file_service.dto.FileUploadResponse;
-import com.udeajobs.profile_cell.file_service.enums.BucketType;
+import com.udeajobs.profile_cell.file_service.enums.FolderType;
 import com.udeajobs.profile_cell.file_service.service.IFileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,30 +27,30 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/files")
 @RequiredArgsConstructor
-@Tag(name = "File Management", description = "API para la gestión de archivos en almacenamiento S3/MinIO. Permite subir, descargar y eliminar archivos en buckets categorizados.")
+@Tag(name = "File Management", description = "API para la gestión de archivos en almacenamiento S3/MinIO. Permite subir, descargar y eliminar archivos organizados en carpetas dentro de un bucket único.")
 public class FileController {
 
     private final IFileStorageService fileStorageService;
 
     /**
-     * Endpoint para subir un archivo al bucket especificado.
+     * Endpoint para subir un archivo a la carpeta especificada.
      *
-     * @param bucketType tipo de bucket (PROFILES, PROJECTS)
+     * @param folderType tipo de carpeta (PROFILE_IMAGES, PROFILE_CVS)
      * @param file archivo multipart a subir
      * @return FileUploadResponse con información del archivo subido
      */
     @Operation(
             summary = "Subir un archivo",
             description = """
-                    Sube un archivo al bucket especificado en el almacenamiento S3/MinIO.
+                    Sube un archivo a la carpeta especificada en el almacenamiento S3/MinIO.
                     
-                    El archivo se almacena con un nombre único generado (UUID + extensión original)
+                    El archivo se almacena con un nombre único generado (UUID + nombre original)
                     para evitar colisiones. El sistema valida el tipo de archivo y retorna
                     información detallada del archivo almacenado, incluyendo la URL de acceso.
                     
                     **Ejemplo de uso:**
-                    - Fotos de perfil → bucket `PROFILES`
-                    - CVs de usuarios → bucket `PROFILES`
+                    - Fotos de perfil → carpeta `PROFILE_IMAGES`
+                    - CVs de usuarios → carpeta `PROFILE_CVS`
                     """
     )
     @ApiResponses(value = {
@@ -60,22 +60,22 @@ public class FileController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Archivo inválido o bucket no válido"
+                    description = "Archivo inválido o carpeta no válida"
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Error interno del servidor al procesar el archivo"
             )
     })
-    @PostMapping(value = "/{bucketType}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{folderType}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FileUploadResponse> uploadFile(
             @Parameter(
-                    description = "Tipo de bucket donde se almacenará el archivo",
+                    description = "Tipo de carpeta donde se almacenará el archivo",
                     required = true,
-                    example = "PROFILES",
-                    schema = @Schema(implementation = BucketType.class)
+                    example = "PROFILE_IMAGES",
+                    schema = @Schema(implementation = FolderType.class)
             )
-            @PathVariable BucketType bucketType,
+            @PathVariable FolderType folderType,
 
             @Parameter(
                     description = "Archivo a subir (FormData)",
@@ -84,33 +84,33 @@ public class FileController {
             )
             @RequestParam("file") MultipartFile file) {
 
-        log.info("Petición de subida de archivo al bucket: {}", bucketType);
+        log.info("Petición de subida de archivo a la carpeta: {}", folderType);
 
         String originalFilename = file.getOriginalFilename();
-        FileUploadResponse response = fileStorageService.uploadFile(bucketType, originalFilename, file);
+        FileUploadResponse response = fileStorageService.uploadFile(folderType, originalFilename, file);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Endpoint para descargar un archivo del bucket especificado.
+     * Endpoint para descargar un archivo de la carpeta especificada.
      * La expresión regular .+ en objectName permite manejar nombres con puntos.
      *
-     * @param bucketType tipo de bucket (PROFILES, PROJECTS)
+     * @param folderType tipo de carpeta (PROFILE_IMAGES, PROFILE_CVS)
      * @param objectName nombre del objeto en el almacenamiento
      * @return archivo como recurso descargable
      */
     @Operation(
             summary = "Descargar un archivo",
             description = """
-                    Descarga un archivo del bucket especificado en el almacenamiento S3/MinIO.
+                    Descarga un archivo de la carpeta especificada en el almacenamiento S3/MinIO.
                     
                     Retorna el archivo como un recurso binario con los headers apropiados
                     (Content-Type, Content-Disposition) para que el navegador pueda manejarlo
                     correctamente, ya sea mostrándolo inline o descargándolo.
                     
                     **Nota:** El objectName debe incluir la extensión del archivo
-                    (ej: `abc123-foto.jpg`)
+                    (ej: `550e8400-e29b-41d4-a716-446655440000_profile.jpg`)
                     """
     )
     @ApiResponses(value = {
@@ -120,47 +120,47 @@ public class FileController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Archivo no encontrado en el bucket especificado"
+                    description = "Archivo no encontrado en la carpeta especificada"
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Error interno del servidor al recuperar el archivo"
             )
     })
-    @GetMapping("/{bucketType}/{objectName:.+}")
+    @GetMapping("/{folderType}/{objectName:.+}")
     public ResponseEntity<Resource> downloadFile(
             @Parameter(
-                    description = "Tipo de bucket donde se encuentra el archivo",
+                    description = "Tipo de carpeta donde se encuentra el archivo",
                     required = true,
-                    example = "PROFILES",
-                    schema = @Schema(implementation = BucketType.class)
+                    example = "PROFILE_IMAGES",
+                    schema = @Schema(implementation = FolderType.class)
             )
-            @PathVariable BucketType bucketType,
+            @PathVariable FolderType folderType,
 
             @Parameter(
-                    description = "Nombre del archivo en el almacenamiento (incluye UUID y extensión)",
+                    description = "Nombre del archivo en el almacenamiento (incluye UUID y nombre original)",
                     required = true,
-                    example = "550e8400-e29b-41d4-a716-446655440000-profile.jpg"
+                    example = "550e8400-e29b-41d4-a716-446655440000_profile.jpg"
             )
             @PathVariable String objectName) {
 
-        log.info("Petición de descarga de archivo: {} del bucket: {}", objectName, bucketType);
+        log.info("Petición de descarga de archivo: {} de la carpeta: {}", objectName, folderType);
 
-        return fileStorageService.downloadFile(bucketType, objectName);
+        return fileStorageService.downloadFile(folderType, objectName);
     }
 
     /**
-     * Endpoint para eliminar un archivo del bucket especificado.
+     * Endpoint para eliminar un archivo de la carpeta especificada.
      * La expresión regular .+ en objectName permite manejar nombres con puntos.
      *
-     * @param bucketType tipo de bucket (PROFILES, PROJECTS)
+     * @param folderType tipo de carpeta (PROFILE_IMAGES, PROFILE_CVS)
      * @param objectName nombre del objeto en el almacenamiento
      * @return ResponseEntity sin contenido (204 No Content)
      */
     @Operation(
             summary = "Eliminar un archivo",
             description = """
-                    Elimina un archivo del bucket especificado en el almacenamiento S3/MinIO.
+                    Elimina un archivo de la carpeta especificada en el almacenamiento S3/MinIO.
                     
                     Esta operación es permanente y no se puede deshacer. El archivo
                     se elimina completamente del almacenamiento.
@@ -176,35 +176,36 @@ public class FileController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Archivo no encontrado en el bucket especificado"
+                    description = "Archivo no encontrado en la carpeta especificada"
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "Error interno del servidor al eliminar el archivo"
             )
     })
-    @DeleteMapping("/{bucketType}/{objectName:.+}")
+    @DeleteMapping("/{folderType}/{objectName:.+}")
     public ResponseEntity<Void> deleteFile(
             @Parameter(
-                    description = "Tipo de bucket donde se encuentra el archivo a eliminar",
+                    description = "Tipo de carpeta donde se encuentra el archivo a eliminar",
                     required = true,
-                    example = "PROFILES",
-                    schema = @Schema(implementation = BucketType.class)
+                    example = "PROFILE_IMAGES",
+                    schema = @Schema(implementation = FolderType.class)
             )
-            @PathVariable BucketType bucketType,
+            @PathVariable FolderType folderType,
 
             @Parameter(
                     description = "Nombre del archivo en el almacenamiento (incluye UUID y extensión)",
                     required = true,
-                    example = "550e8400-e29b-41d4-a716-446655440000-profile.jpg"
+                    example = "550e8400-e29b-41d4-a716-446655440000_profile.jpg"
             )
             @PathVariable String objectName) {
 
-        log.info("Petición de eliminación de archivo: {} del bucket: {}", objectName, bucketType);
+        log.info("Petición de eliminación de archivo: {} de la carpeta: {}", objectName, folderType);
 
-        fileStorageService.deleteFile(bucketType, objectName);
+        fileStorageService.deleteFile(folderType, objectName);
 
         return ResponseEntity.noContent().build();
     }
 }
+
 

@@ -38,9 +38,9 @@ public class FileUploadResponse {
     private Long size;
 
     /**
-     * Tipo de bucket donde se almacenó el archivo
+     * Tipo de carpeta donde se almacenó el archivo
      */
-    private String bucketType;
+    private String folderType;
 
     /**
      * Timestamp de cuando se subió el archivo
