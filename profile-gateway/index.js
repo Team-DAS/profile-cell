@@ -21,28 +21,22 @@ if (!PROFILE_SERVICE_URL || !FILES_SERVICE_URL || !DASHBOARD_SERVICE_URL) {
 // --- 3. Registro de Rutas (El Proxy) ---
 fastify.register(httpProxy, {
   upstream: DASHBOARD_SERVICE_URL,
-  prefix: 'profile-cell/api/v1/dashboard/graphql',  
-  rewritePrefix: '/graphql', 
-});
-
-fastify.register(httpProxy, {
-  upstream: DASHBOARD_SERVICE_URL,
-  prefix: 'profile-cell/api/v1/dashboard/playground',  
-  rewritePrefix: '/playground', 
+  prefix: '/profile-cell/dashboard/graphql',  // <-- URL pública simple
+  rewritePrefix: '/graphql',  // <-- URL interna
 });
 
 
 fastify.register(httpProxy, {
   upstream: PROFILE_SERVICE_URL,
-  prefix: 'profile-cell/api/v1/profile', 
-  rewritePrefix: '/api/v1/profile', 
+  prefix: '/profile-cell/profiles',  // <-- URL pública simple
+  rewritePrefix: '/api/v1/profile',  // <-- URL interna con versión
 });
 
 
 fastify.register(httpProxy, {
   upstream: FILES_SERVICE_URL,
-  prefix: 'profile-cell/api/v1/files', 
-  rewritePrefix: '/api/v1/files', 
+  prefix: '/profile-cell/files',  // <-- URL pública simple
+  rewritePrefix: '/api/v1/files',  // <-- URL interna con versión
 });
 
 // --- 4. Iniciar el Servidor ---
