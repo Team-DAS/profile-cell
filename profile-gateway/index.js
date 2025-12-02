@@ -21,6 +21,12 @@ if (!PROFILE_SERVICE_URL || !FILES_SERVICE_URL || !DASHBOARD_SERVICE_URL) {
 // --- 3. Registro de Rutas (El Proxy) ---
 fastify.register(httpProxy, {
   upstream: DASHBOARD_SERVICE_URL,
+  prefix: '/profile-cell/dashboard/playground',  // <-- URL pública simple
+  rewritePrefix: '/playground',  // <-- URL interna
+});
+
+fastify.register(httpProxy, {
+  upstream: DASHBOARD_SERVICE_URL,
   prefix: '/profile-cell/dashboard/graphql',  // <-- URL pública simple
   rewritePrefix: '/graphql',  // <-- URL interna
 });
