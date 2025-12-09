@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String EXCHANGE_NAME = "udea.identity.account-service";
-    public static final String QUEUE_NAME = "udea.creation_profile.queue";
+    public static final String EXCHANGE_NAME = "account.exchange";
+    public static final String QUEUE_NAME = "creation_profile.queue";
     public static final String ROUTING_KEY = "user.verified";
 
     @Bean
